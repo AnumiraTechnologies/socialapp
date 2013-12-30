@@ -1,0 +1,245 @@
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+
+<?php
+/**
+ * DataSift client
+ *
+ * This software is the intellectual property of MediaSift Ltd., and is covered
+ * by retained intellectual property rights, including copyright.
+ *
+ * @category  DataSift
+ * @package   PHP-client
+ * @author    Stuart Dallas <stuart@3ft9.com>
+ * @copyright 2011 MediaSift Ltd.
+ * @license   http://www.debian.org/misc/bsd.license BSD License (3 Clause)
+ * @link      http://www.mediasift.com
+ */
+
+/**
+ * This example constructs a DataSift_Definition object with CSDL that looks
+ * for anything containing the word "football". It then gets an HTTP
+ * consumer for that definition and displays matching interactions to the
+ * screen as they come in. It will display 10 interactions and then stop.
+ *
+ * NB: Most of the error handling (exception catching) has been removed for
+ * the sake of simplicity. Nearly everything in this library may throw
+ * exceptions, and production code should catch them. See the documentation
+ * for full details.
+ */
+if (function_exists('date_default_timezone_set')) {
+        date_default_timezone_set('UTC');
+}
+
+// Include the DataSift library
+require 'lib/datasift.php';
+
+// Include the configuration - put your username and API key in this file
+//require dirname(__FILE__).'/../config.php';
+
+/**
+ * This class will handle the events.
+ */
+class EventHandler implements DataSift_IStreamConsumerEventHandler
+{
+  /**
+   * @var int Timeout in seconds.
+   */
+        private $_num = 10;
+        private $a = 0;
+        private $b = 0;
+        private $c = 0;
+        private $d = 0;
+        private $e = 0;
+        private $f = 0;
+
+        /**
+         * Called when the stream is connected.
+         *
+         * @param DataSift_StreamConsumer $consumer The consumer sending the event.
+         *
+         * @return void
+         */
+        public function onConnect($consumer)
+        {
+                echo 'Connected'.PHP_EOL;
+        }
+
+        /**
+         * Called for each interaction consumed.
+         *
+         * @param DataSift_StreamConsumer $consumer    The consumer sending the
+         *                                             event.
+         * @param array                   $interaction The interaction data.
+         * @param string                  $hash        The hash of the stream that
+         *                                             matched this interaction.
+         *
+         * @return void
+         */
+        public function onInteraction($consumer, $interaction, $hash)
+        {
+        echo $interaction['twitter']['user']['screen_name']."<br>";
+        echo $interaction['twitter']['text']."<br>--";
+                 echo 'Country: '.$interaction['twitter']['place']['country']."<br>";
+				$text = $interaction['twitter']['text'];
+ 				if(strpos($text,"kejriwal") !== false) { $this->a = $this->a + 1; }
+				elseif(strpos($text,"sachin") !== false) { $this->b = $this->b + 1; }
+				elseif(strpos($text,"Sonia Gandhi") !== false) { $this->c = $this->c + 1; }
+				elseif(strpos($text,"Hazare") !== false) { $this->d = $this->d + 1; }
+				elseif(strpos($text,"Rahul Gandhi") !== false) { $this->e = $this->e + 1; }
+				else { $this->f = $this->f + 1; } 
+                // Stop after 10
+                if ($this->_num-- == 1) {
+				$arr = array("kejriwal"=>"1",
+							 "sachin"=>"1",
+							 "Sonia Gandhi"=>"1",
+							 "Hazare"=>"1",
+							 "Rahul Gandhi"=>"1");
+				$arr['kejriwal'] = $this->a;
+				$arr['sachin'] = $this->b;
+				$arr['Sonia Gandhi'] = $this->c;
+				$arr['Hazare'] = $this->d;
+				$arr['Rahul Gandhi'] = $this->e;
+				$arr['others'] = $this->f;
+				arsort($arr);
+                        echo "Stopping consumer...\n";
+                        echo "Printing chart...\n";
+                        $consumer->stop();
+?>
+
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      function drawTable() {
+          var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Name');
+  data.addColumn('number', 'Count');
+  data.addColumn('number','Perday');
+  data.addRows([
+  <?php
+  foreach ($arr as $key=>$value) {
+  echo "['" . $key . "', " . $this->a . ",1],";
+}
+  ]);
+
+  var table = new google.visualization.Table(document.getElementById('barformat_div'));
+  
+  var formatter = new google.visualization.BarFormat({width: 120});
+  formatter.format(data, 1); // Apply formatter to second column
+  formatter.format(data,2);
+  table.draw(data, {allowHtml: true, showRowNumber: true});
+      }
+    </script>
+<?php						
+                }
+        }
+
+        /**
+         * Called for each deletion notification consumed.
+         *
+         * @param DataSift_StreamConsumer $consumer    The consumer sending the
+         *                                             event.
+         * @param array                   $interaction The interaction data.
+         * @param string                  $hash        The hash of the stream that
+         *                                             matched this interaction.
+         *
+         * @return void
+         */
+        public function onDeleted($consumer, $interaction, $hash)
+        {
+                echo 'DELETE request for interaction ' . $interaction['interaction']['id']
+                        . ' of type ' . $interaction['interaction']['type']
+                        . '. Please delete it from your archive.';
+        }
+
+        /**
+         * Called when a status message is received.
+         *
+         * @param DataSift_StreamConsumer $consumer    The consumer sending the
+         *                                             event.
+         * @param string                  $type        The status type.
+         * @param array                   $info        The data sent with the
+         *                                             status message.
+         */
+        public function onStatus($consumer, $type, $info)
+        {
+                switch ($type) {
+                        default:
+                                echo 'STATUS: '.$type.PHP_EOL;
+                                break;
+                }
+        }
+
+        /**
+         * Called when a warning occurs or is received down the stream.
+         *
+         * @param DataSift_StreamConsumer $consumer The consumer sending the event.
+         * @param string $message The warning message.
+         *
+         * @return void
+         */
+        public function onWarning($consumer, $message)
+        {
+                echo 'WARNING: '.$message.PHP_EOL;
+        }
+
+        /**
+         * Called when an error occurs or is received down the stream.
+         *
+         * @param DataSift_StreamConsumer consumer The consumer sending the event.
+         * @param string $message The error message.
+         *
+         * @return void
+         */
+        public function onError($consumer, $message)
+        {
+                echo 'ERROR: '.$message.PHP_EOL;
+        }
+
+        /**
+         * Called when the stream is disconnected.
+         *
+         * @param DataSift_StreamConsumer $consumer The consumer sending the event.
+         *
+         * @return void
+         */
+        public function onDisconnect($consumer)
+        {
+                echo 'Disconnected'.PHP_EOL;
+        }
+
+        /**
+         * Called when the consumer stops for some reason.
+         *
+         * @param DataSift_StreamConsumer $consumer The consumer sending the event.
+         * @param string $reason The reason the consumer stopped.
+         *
+         * @return void
+         */
+        public function onStopped($consumer, $reason)
+        {
+                echo PHP_EOL.'Stopped: '.$reason.PHP_EOL.PHP_EOL;
+        }
+}
+
+// Authenticate
+echo "Creating user...\n";
+$user = new DataSift_User('senthil123kumar', '08850cbc877a9b626bc7ebcb46556ef9');
+$user->enableSSL(false);
+// Create the definition
+//$csdl = 'twitter.filter_level in "high" AND twitter.place.country=="India"';
+$csdl = 'twitter.text cs contains_any "Rahul Gandhi,Sonia Gandhi,Hazare,kejriwal,sachin"';
+echo "Creating definition...\n  $csdl\n";
+$definition = new DataSift_Definition($user, $csdl);
+
+// Create the consumer
+echo "Getting the consumer...\n";
+$consumer = $definition->getConsumer(DataSift_StreamConsumer::TYPE_HTTP, new EventHandler());
+
+// And start consuming
+echo "Consuming...\n--\n";
+$consumer->consume();
+
+echo "Finished consuming\n\n";
+
+?>
+<div id='barformat_div'></div>
