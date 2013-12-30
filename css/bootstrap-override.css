@@ -1,5 +1,7 @@
 body {background-color:#E2B5D6; font-family: 'News Cycle', sans-serif;}
 
 
-.container-fluid{padding-top:45px;}
+.container-fluid{padding-top:95px;}
+.container{padding-top:200px; padding-left:245px;}
 .title{color:#fff;}
+.top-setting{padding-right:45px;}
