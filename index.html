@@ -7,17 +7,26 @@
 	<link href='http://fonts.googleapis.com/css?family=News+Cycle' rel='stylesheet' type='text/css'>
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href="css/bootstrap-override.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="https://dt2lvkroutb6v.cloudfront.net/js/jquery-latest.js"></script> 
 	<script>
-$.get(
-   'index.html?mode=ajax,
-   function(data) { alert("hi"); }
-);	
+    $(document).ready(function(){
+        $("#go").click(function () {
+         $.ajax({
+                type : "GET",
+                url  : 'results.php',
+                async: true,
+                success : function(msgqn){
+                $("#bubblechart").html(msgqn);			
+                }
+           });	
+           });	
+});
 	</script>
   </head>
   <body>
-    	<div class="row pull-right top-setting">
-			<i class="icon-globe"></i><b>Settings</b>
-		</div>
+		<div class="container-fluid">
+			<div class="span4"><button id="go" name="go" class="btn btn-inverse">Start</button><button class="btn btn-inverse">Stop</button></div>
+		</div>	
 	<div class="container-fluid">
 		<div class="row">
 			<div class="span12">
@@ -38,23 +47,12 @@ $.get(
 				<h3>Tweets</h3>
 			</div>
 		</div>
-		<div class="row-fluid">
-			<div class="span1"><button class="btn btn-inverse">Start</button></div>
-			<div class="span1"><button class="btn btn-inverse">Stop</button></div>
-		</div>
-<?php
-if (isset($_REQUEST['ajaxGetLocations'])
-{
-?>
-		<div class="row-fluid">
-			<div class="span1">hello</div>
-
-		</div>
-<?php
-}
-?>		
+	
 	</div>
-    <script src="http://code.jquery.com/jquery.js"></script>
+		<div class="container-fluid">
+			<div class="span12" id="bubblechart"></div>
+		</div>	
+
     <script src="js/bootstrap.min.js"></script>
   </body>
 </html>

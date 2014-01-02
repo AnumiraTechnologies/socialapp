@@ -27,6 +27,7 @@ echo "Authentication failed !<br>";
 $_SESSION['bdid'] = $_POST['scode'];
 header("location:index.php");
 }
+}
 			?>
 			<form action="login.php" method="POST">
 				<input type="password" name="scode" class="input-medium search-query">
